@@ -1,0 +1,15 @@
+static_sites:
+  - 2007.tracon.fi
+
+ingress_letsencrypt_enabled: false
+
+ingress_annotations: !If
+  test: !Var ingress_letsencrypt_enabled
+  then:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+
+nginx_deployment_labels:
+  app.kubernetes.io/name: nginx
+  app.kubernetes.io/component: server
+  app.kubernetes.io/part-of: static

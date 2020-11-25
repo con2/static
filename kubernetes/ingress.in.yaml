@@ -1,0 +1,21 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: static
+  annotations: !Var ingress_annotations
+spec:
+  tls:
+    - secretName: ingress-letsencrypt
+      hosts: !Var static_sites
+
+  rules: !Loop
+    over: !Var static_sites
+    as: ingress_public_hostname
+    template:
+      host: !Var ingress_public_hostname
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: nginx
+              servicePort: 80

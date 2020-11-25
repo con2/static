@@ -1,0 +1,15 @@
+static_sites:
+  - 2005.tracon.fi
+  - 2006.tracon.fi
+  - 2007.tracon.fi
+  - 2008.tracon.fi
+  - 2009.tracon.fi
+  - 2010.tracon.fi
+  - 2011.tracon.fi
+  - 2012.tracon.fi
+  - 2013.tracon.fi
+  - 2014.tracon.fi
+  - 2015.tracon.fi
+  - media.tracon.fi
+
+ingress_letsencrypt_enabled: true

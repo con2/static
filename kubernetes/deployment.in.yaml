@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+  labels: !Var nginx_deployment_labels
+spec:
+  selector:
+    matchLabels: !Var nginx_deployment_labels
+  template:
+    metadata:
+      labels: !Var nginx_deployment_labels
+    spec:
+      enableServiceLinks: false
+      containers:
+        - name: nginx
+          image: con2-static
+          env:
+            - name: STATIC_SITES
+              value: !Join
+                separator: " "
+                items: !Var static_sites
+          ports:
+            - containerPort: 80
+          startupProbe:
+            httpGet:
+              path: /
+              port: 80
+              httpHeaders:
+                - name: Host
+                  value: !Lookup static_sites[0]
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 5
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+              httpHeaders:
+                - name: Host
+                  value: !Lookup static_sites[0]
+            periodSeconds: 30
+          volumeMounts:
+            - mountPath: /etc/nginx/conf.d
+              name: conf
+            - mountPath: /tmp
+              name: temp
+            - mountPath: /var/run
+              name: pid
+      volumes:
+        - name: conf
+          emptyDir: {}
+        - name: temp
+          emptyDir: {}
+        - name: pid
+          emptyDir: {}

@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+  labels: !Var nginx_deployment_labels
+spec:
+  ports:
+  - port: 80
+    targetPort: 80
+  selector: !Var nginx_deployment_labels

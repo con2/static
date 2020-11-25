@@ -1,0 +1,5 @@
+!Include deployment.in.yaml
+---
+!Include service.in.yaml
+---
+!Include ingress.in.yaml

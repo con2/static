@@ -1,0 +1,17 @@
+apiVersion: skaffold/v2beta9
+kind: Config
+metadata:
+  name: static
+
+build:
+  local:
+    useBuildkit: true
+  artifacts:
+    - image: con2-static
+      context: .
+
+deploy:
+  statusCheckDeadlineSeconds: 300
+  kubectl:
+    manifests:
+      - kubernetes/template.compiled.yaml
