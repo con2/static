@@ -3,3 +3,5 @@
 !Include service.in.yaml
 ---
 !Include ingress.in.yaml
+---
+!Include configmap.in.yaml

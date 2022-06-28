@@ -13,12 +13,7 @@ spec:
       enableServiceLinks: false
       containers:
         - name: nginx
-          image: con2-static
-          env:
-            - name: STATIC_SITES
-              value: !Join
-                separator: " "
-                items: !Var static_sites
+          image: nginx:1-alpine
           ports:
             - containerPort: 80
           startupProbe:
@@ -41,15 +36,9 @@ spec:
             periodSeconds: 30
           volumeMounts:
             - mountPath: /etc/nginx/conf.d
-              name: conf
-            - mountPath: /tmp
-              name: temp
-            - mountPath: /var/run
-              name: pid
+              name: config
+              readOnly: true
       volumes:
-        - name: conf
-          emptyDir: {}
-        - name: temp
-          emptyDir: {}
-        - name: pid
-          emptyDir: {}
+        - name: config
+          configMap:
+            name: nginx

@@ -3,6 +3,9 @@ static_sites:
 
 ingress_letsencrypt_enabled: false
 
+minio_bucket_name: static
+minio_internal_url: http://minio.minio.svc.cluster.local:9000
+
 ingress_annotations: !If
   test: !Var ingress_letsencrypt_enabled
   then:

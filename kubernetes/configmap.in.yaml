@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx
+data: !Index
+  over: !Var static_sites
+  as: hostname
+  by: !Format "{hostname}.conf"
+  template: !Format |
+    server {{
+      listen 80;
+      server_name {hostname};
+
+      location / {{
+        rewrite /media/(.*) /{minio_bucket_name}/{hostname}/$1 break;
+        proxy_pass {minio_internal_url};
+        proxy_redirect off;
+      }}
+    }}
