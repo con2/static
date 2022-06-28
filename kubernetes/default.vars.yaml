@@ -2,6 +2,7 @@ static_sites:
   - 2007.tracon.fi
 
 ingress_letsencrypt_enabled: false
+ingress_class_name: nginx
 
 minio_bucket_name: static
 minio_internal_url: http://minio.minio.svc.cluster.local:9000

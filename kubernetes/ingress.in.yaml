@@ -1,9 +1,10 @@
-apiVersion: extensions/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: static
   annotations: !Var ingress_annotations
 spec:
+  ingressClassName: !Var ingress_class_name
   tls:
     - secretName: ingress-letsencrypt
       hosts: !Var static_sites
@@ -15,7 +16,10 @@ spec:
       host: !Var ingress_public_hostname
       http:
         paths:
-          - path: /
+          - pathType: Prefix
+            path: /
             backend:
-              serviceName: nginx
-              servicePort: 80
+              service:
+                name: nginx
+                port:
+                  number: 80
