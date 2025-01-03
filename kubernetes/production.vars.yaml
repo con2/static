@@ -11,5 +11,6 @@ static_sites:
   - 2014.tracon.fi
   - 2015.tracon.fi
   - media.tracon.fi
+  - 2024.tracon.fi
 
 ingress_letsencrypt_enabled: true
