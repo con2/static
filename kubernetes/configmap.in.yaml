@@ -12,7 +12,7 @@ data: !Index
       server_name {hostname};
 
       location / {{
-        rewrite /$ ${request_uri}index.html last;
+        rewrite /$ ${{request_uri}}index.html last;
         rewrite /(.*) /{minio_bucket_name}/{hostname}/$1 break;
         proxy_pass {minio_internal_url};
         proxy_redirect off;
