@@ -11,9 +11,23 @@ data: !Index
       listen 80;
       server_name {hostname};
 
+      # Try the exact key first; on a Minio 404 (eg. a hub page like /blog
+      # that only has blog/index.html, no bare "blog" key, because burn.py
+      # can't write both without colliding with its own children on Minio's
+      # storage backend), fall back to appending /index.html. This also
+      # covers plain trailing-slash requests, replacing the old special case
+      # for those.
       location / {{
-        rewrite /$ ${{request_uri}}index.html last;
+        proxy_intercept_errors on;
+        error_page 404 = @fallback;
         rewrite /(.*) /{minio_bucket_name}/{hostname}/$1 break;
+        proxy_pass {minio_internal_url};
+        proxy_redirect off;
+      }}
+
+      location @fallback {{
+        rewrite ^(.*)/$ $1;
+        rewrite ^(.*)$ /{minio_bucket_name}/{hostname}$1/index.html break;
         proxy_pass {minio_internal_url};
         proxy_redirect off;
       }}
