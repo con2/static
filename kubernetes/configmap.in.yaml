@@ -26,8 +26,12 @@ data: !Index
       }}
 
       location @fallback {{
+        # $uri here is already /{minio_bucket_name}/{hostname}/... from the
+        # location /'s rewrite above (error_page preserves it, doesn't reset
+        # to the original client path) -- just strip a trailing slash and
+        # append /index.html, don't re-add the bucket/hostname prefix.
         rewrite ^(.*)/$ $1;
-        rewrite ^(.*)$ /{minio_bucket_name}/{hostname}$1/index.html break;
+        rewrite ^(.*)$ $1/index.html break;
         proxy_pass {minio_internal_url};
         proxy_redirect off;
       }}
