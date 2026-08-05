@@ -12,5 +12,22 @@ static_sites:
   - 2015.tracon.fi
   - media.tracon.fi
   - 2024.tracon.fi
+  - 2015.hitpoint.tracon.fi
+  - 2016.hitpoint.tracon.fi
+  - 2016.tracon.fi
+  - 2017.hitpoint.tracon.fi
+  - 2017.tracon.fi
+  - 2018.tracon.fi
+  - 2019.hitpoint.tracon.fi
+  - 2019.tracon.fi
+  - 2020.hitpoint.tracon.fi
+  - 2020.tracon.fi
+  - 2021.tracon.fi
+  - 2022.tracon.fi
+  - 2023.hitpoint.tracon.fi
+  - 2023.tracon.fi
+  - blog.tracon.fi
+  - r.tracon.fi
+  - ry.tracon.fi
 
 ingress_letsencrypt_enabled: true
