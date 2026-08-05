@@ -13,7 +13,7 @@ jobs:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7
         with:
-          python-version: '3.x'
+          python-version: "3.x"
       - id: cache-bin
         uses: actions/cache@v6
         with:
@@ -26,7 +26,6 @@ jobs:
           curl -Lo bin/kubectl https://dl.k8s.io/release/v1.36.2/bin/linux/amd64/kubectl
           chmod +x bin/skaffold bin/kubectl
       - run: echo "$PWD/bin" >> $GITHUB_PATH
-      - uses: docker/setup-buildx-action@v4
       - run: |
           python3 -m pip install emskaffolden
           emskaffolden -E production -- run -n static
