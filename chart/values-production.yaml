@@ -29,6 +29,7 @@ sites:
   - 2023.tracon.fi
   - blog.tracon.fi
   - r.tracon.fi
+  - con2.fi
 
 letsencrypt:
   enabled: true
