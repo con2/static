@@ -1,5 +1,5 @@
 # One-off copy of every site from the Minio `static` bucket (prefix per hostname) to its
-# Garage bucket. Not part of the Emrichen template; apply by hand and delete afterwards.
+# Garage bucket. Not a chart template; apply by hand and delete afterwards.
 # Safe to re-run: rclone copy only transfers missing or changed objects and never deletes.
 #
 # Content-Type travels with each object (rclone copies S3 object metadata between S3
@@ -12,7 +12,7 @@
 #     --from-literal=RCLONE_CONFIG_MINIO_SECRET_ACCESS_KEY=... \
 #     --from-literal=RCLONE_CONFIG_GARAGE_ACCESS_KEY_ID=<static key id> \
 #     --from-literal=RCLONE_CONFIG_GARAGE_SECRET_ACCESS_KEY=<static key secret>
-#   kubectl -n static apply -f kubernetes/migrate-from-minio.job.yaml
+#   kubectl -n static apply -f chart/migrate-from-minio.job.yaml
 #   kubectl -n static logs -f job/static-migrate-from-minio
 # Afterwards:
 #   kubectl -n static delete job static-migrate-from-minio secret static-migrate-credentials

@@ -11,21 +11,9 @@ jobs:
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-python@v7
-        with:
-          python-version: "3.x"
-      - id: cache-bin
-        uses: actions/cache@v6
-        with:
-          path: bin
-          key: ${{ runner.os }}-bin-3
-      - if: steps.cache-bin.outputs.cache-hit != 'true'
-        run: |
-          mkdir bin
-          curl -Lo bin/skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-linux-amd64
-          curl -Lo bin/kubectl https://dl.k8s.io/release/v1.36.2/bin/linux/amd64/kubectl
-          chmod +x bin/skaffold bin/kubectl
-      - run: echo "$PWD/bin" >> $GITHUB_PATH
+      - uses: azure/setup-helm@v5
       - run: |
-          python3 -m pip install emskaffolden
-          emskaffolden -E production -- run -n static
+          helm upgrade --install static chart \
+            --namespace static \
+            -f chart/values-production.yaml \
+            --wait --timeout 300s

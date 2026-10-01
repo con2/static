@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Creates the Garage bucket for each static site and makes it servable.
 #
-# Idempotent: re-run after adding a hostname to kubernetes/production.vars.yaml. Garage
+# Idempotent: re-run after adding a hostname to chart/values-production.yaml. Garage
 # itself has no public access, so a site is only reachable through the web endpoint once
 # website access is allowed on its bucket (bucket name = hostname, which is how the web
 # endpoint picks the bucket from the Host header).
@@ -10,7 +10,7 @@
 # (the off-site mirror in infrastructure/kubernetes/garage/backup.cronjob-sync.yaml).
 #
 # Usage:
-#   bin/garage-buckets.sh                      # every hostname in production.vars.yaml
+#   bin/garage-buckets.sh                      # every hostname in values-production.yaml
 #   bin/garage-buckets.sh 2024.tracon.fi ...   # just these
 set -euo pipefail
 
@@ -23,8 +23,8 @@ garage() {
 if [ $# -gt 0 ]; then
   hostnames=("$@")
 else
-  # The static_sites list is the first block of production.vars.yaml, one "  - host" per line.
-  mapfile -t hostnames < <(sed -n '/^static_sites:/,/^$/p' kubernetes/production.vars.yaml | sed -n 's/^  - //p')
+  # The sites list is the first block of values-production.yaml, one "  - host" per line.
+  mapfile -t hostnames < <(sed -n '/^sites:/,/^$/p' chart/values-production.yaml | sed -n 's/^  - //p')
 fi
 
 existing=$(garage bucket list | awk 'NR>1 {print $3}')

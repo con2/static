@@ -1,5 +1,0 @@
-!Include gateway.in.yaml
----
-!Include httproute-redirect.in.yaml
----
-!Include httproute-web.in.yaml

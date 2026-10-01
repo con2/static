@@ -1,0 +1,5 @@
+apiVersion: v2
+name: static
+description: Archived static sites served from per-hostname Garage buckets through a Gateway
+type: application
+version: 0.1.0

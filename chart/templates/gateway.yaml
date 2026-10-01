@@ -1,0 +1,43 @@
+# One Gateway for every static site. cert-manager (via the annotation) issues a single
+# certificate covering every HTTPS listener's hostname into tlsSecretName, so adding a
+# site to `sites` is enough to get it a certificate.
+#
+# Gateway API caps a Gateway at 64 listeners: one plain-HTTP listener plus one HTTPS
+# listener per site leaves room for 63 sites. Split into a second Gateway past that.
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: static
+  labels:
+    {{- include "static.labels" . | nindent 4 }}
+  {{- if .Values.letsencrypt.enabled }}
+  annotations:
+    cert-manager.io/cluster-issuer: {{ .Values.letsencrypt.clusterIssuer | quote }}
+  {{- end }}
+spec:
+  gatewayClassName: traefik
+  listeners:
+    # No hostname on the HTTP listener: Traefik only routes what the attached HTTPRoutes
+    # name, so this does not capture other apps' traffic.
+    - name: http
+      protocol: HTTP
+      port: 80
+      allowedRoutes:
+        namespaces:
+          from: Same
+    {{- if .Values.letsencrypt.enabled }}
+    {{- range .Values.sites }}
+    - name: {{ include "static.listenerName" . | quote }}
+      protocol: HTTPS
+      port: 443
+      hostname: {{ . | quote }}
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            name: {{ $.Values.tlsSecretName | quote }}
+      allowedRoutes:
+        namespaces:
+          from: Same
+    {{- end }}
+    {{- end }}

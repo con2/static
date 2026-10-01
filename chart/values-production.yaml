@@ -1,4 +1,4 @@
-static_sites:
+sites:
   - 2005.tracon.fi
   - 2006.tracon.fi
   - 2007.tracon.fi
@@ -31,4 +31,5 @@ static_sites:
   - r.tracon.fi
   - ry.tracon.fi
 
-letsencrypt_enabled: true
+letsencrypt:
+  enabled: true

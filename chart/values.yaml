@@ -1,0 +1,20 @@
+# Real hostnames live in values-production.yaml.
+
+# One Garage bucket per hostname, named exactly after it, served through Garage's built-in
+# web endpoint, which picks the bucket by the Host header. The bucket must have website
+# access enabled: bin/garage-buckets.sh does that.
+sites:
+  - 2007.tracon.fi
+
+garage:
+  namespace: garage
+  serviceName: garage
+  webPort: 3902
+
+# When false, only a plain-HTTP listener is created, so a dev cluster without cert-manager
+# still gets a working Gateway.
+letsencrypt:
+  enabled: false
+  clusterIssuer: letsencrypt-prod
+
+tlsSecretName: static-tls

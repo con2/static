@@ -1,0 +1,56 @@
+# One pair of HTTPRoutes per site rather than one route listing every hostname: an
+# HTTPRoute allows at most 16 hostnames.
+{{- range .Values.sites }}
+{{- if $.Values.letsencrypt.enabled }}
+---
+# Plain HTTP only redirects to HTTPS. Done per app instead of at the Traefik entrypoint so
+# cert-manager's HTTP-01 solver Ingress keeps working.
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: redirect-{{ . }}
+  labels:
+    {{- include "static.labels" $ | nindent 4 }}
+spec:
+  parentRefs:
+    - name: static
+      sectionName: http
+  hostnames:
+    - {{ . | quote }}
+  rules:
+    - filters:
+        - type: RequestRedirect
+          requestRedirect:
+            scheme: https
+            statusCode: 301
+{{- end }}
+---
+# Traefik passes the Host header through unchanged and Garage picks the bucket whose name
+# equals the Host. The cross-namespace backendRef needs a ReferenceGrant in the garage
+# namespace: infrastructure/kubernetes/garage/static-referencegrant.yaml.
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: web-{{ . }}
+  labels:
+    {{- include "static.labels" $ | nindent 4 }}
+spec:
+  parentRefs:
+    - name: static
+      {{- if $.Values.letsencrypt.enabled }}
+      sectionName: {{ include "static.listenerName" . | quote }}
+      {{- else }}
+      sectionName: http
+      {{- end }}
+  hostnames:
+    - {{ . | quote }}
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: {{ $.Values.garage.serviceName | quote }}
+          namespace: {{ $.Values.garage.namespace | quote }}
+          port: {{ $.Values.garage.webPort }}
+{{- end }}
