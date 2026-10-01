@@ -1,0 +1,67 @@
+# One-off copy of every site from the Minio `static` bucket (prefix per hostname) to its
+# Garage bucket. Not part of the Emrichen template; apply by hand and delete afterwards.
+# Safe to re-run: rclone copy only transfers missing or changed objects and never deletes.
+#
+# Content-Type travels with each object (rclone copies S3 object metadata between S3
+# remotes), which matters because tracontent-premium burns pages as extensionless keys.
+#
+# Before applying:
+#   bin/garage-buckets.sh
+#   kubectl -n static create secret generic static-migrate-credentials \
+#     --from-literal=RCLONE_CONFIG_MINIO_ACCESS_KEY_ID=... \
+#     --from-literal=RCLONE_CONFIG_MINIO_SECRET_ACCESS_KEY=... \
+#     --from-literal=RCLONE_CONFIG_GARAGE_ACCESS_KEY_ID=<static key id> \
+#     --from-literal=RCLONE_CONFIG_GARAGE_SECRET_ACCESS_KEY=<static key secret>
+#   kubectl -n static apply -f kubernetes/migrate-from-minio.job.yaml
+#   kubectl -n static logs -f job/static-migrate-from-minio
+# Afterwards:
+#   kubectl -n static delete job static-migrate-from-minio secret static-migrate-credentials
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: static-migrate-from-minio
+  namespace: static
+spec:
+  backoffLimit: 1
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: rclone
+          image: rclone/rclone:1.75.0
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -eu
+              for site in $(rclone lsf minio:static --dirs-only | tr -d /); do
+                echo "copying $site"
+                rclone copy "minio:static/$site" "garage:$site" --fast-list --transfers 8 --checkers 16 --stats 1m --stats-one-line
+              done
+          env:
+            - name: RCLONE_CONFIG_MINIO_TYPE
+              value: s3
+            - name: RCLONE_CONFIG_MINIO_PROVIDER
+              value: Minio
+            - name: RCLONE_CONFIG_MINIO_ENDPOINT
+              value: http://minio.minio.svc.cluster.local:9000
+            - name: RCLONE_CONFIG_MINIO_FORCE_PATH_STYLE
+              value: "true"
+            - name: RCLONE_CONFIG_GARAGE_TYPE
+              value: s3
+            - name: RCLONE_CONFIG_GARAGE_PROVIDER
+              value: Other
+            - name: RCLONE_CONFIG_GARAGE_ENDPOINT
+              value: http://garage.garage.svc.cluster.local:3900
+            - name: RCLONE_CONFIG_GARAGE_REGION
+              value: garage
+            - name: RCLONE_CONFIG_GARAGE_FORCE_PATH_STYLE
+              value: "true"
+          envFrom:
+            - secretRef:
+                name: static-migrate-credentials
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              memory: 512Mi

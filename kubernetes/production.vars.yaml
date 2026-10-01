@@ -30,4 +30,4 @@ static_sites:
   - r.tracon.fi
   - ry.tracon.fi
 
-ingress_letsencrypt_enabled: true
+letsencrypt_enabled: true

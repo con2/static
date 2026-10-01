@@ -1,23 +1,24 @@
 static_sites:
   - 2007.tracon.fi
 
-ingress_letsencrypt_enabled: false
-ingress_class_name: traefik
+# Each site is served from the Garage bucket named exactly after its hostname, through
+# Garage's built-in web endpoint (port 3902 on the garage Service). The bucket must have
+# website access enabled: bin/garage-buckets.sh does that.
+garage_namespace: garage
+garage_service_name: garage
+garage_web_port: 3902
 
-minio_bucket_name: static
-minio_internal_url: http://minio.minio.svc.cluster.local:9000
+# Set in production.vars.yaml. When false, only a plain-HTTP listener is created, so a dev
+# cluster without cert-manager still gets a working Gateway.
+letsencrypt_enabled: false
 
-# The https-redirect middleware must only be attached where TLS is actually configured
-# (not local/dev without letsencrypt) - see infrastructure/kubernetes/traefik-middlewares.yaml
-# for why this is a per-app opt-in Middleware rather than a global entrypoint redirect
-# (ACME HTTP-01 safety).
-ingress_annotations: !If
-  test: !Var ingress_letsencrypt_enabled
+# HTTP->HTTPS redirect is a per-app HTTPRoute instead of a global Traefik entrypoint
+# redirect - see infrastructure/kubernetes/traefik-middlewares.yaml for why (ACME HTTP-01
+# safety).
+gateway_annotations: !If
+  test: !Var letsencrypt_enabled
   then:
     cert-manager.io/cluster-issuer: letsencrypt-prod
-    traefik.ingress.kubernetes.io/router.middlewares: default-https-redirect@kubernetescrd
+  else: {}
 
-nginx_deployment_labels:
-  app.kubernetes.io/name: nginx
-  app.kubernetes.io/component: server
-  app.kubernetes.io/part-of: static
+tls_secret_name: static-tls

@@ -1,7 +1,5 @@
-!Include deployment.in.yaml
+!Include gateway.in.yaml
 ---
-!Include service.in.yaml
+!Include httproute-redirect.in.yaml
 ---
-!Include ingress.in.yaml
----
-!Include configmap.in.yaml
+!Include httproute-web.in.yaml

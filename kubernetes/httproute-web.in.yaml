@@ -1,0 +1,30 @@
+# Routes every site to Garage's web endpoint. Traefik passes the Host header through
+# unchanged and Garage picks the bucket whose name equals the Host, so one route covers
+# all sites. The cross-namespace backendRef needs a ReferenceGrant in the garage namespace:
+# infrastructure/kubernetes/garage/static-referencegrant.yaml.
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: web
+spec:
+  parentRefs: !If
+    test: !Var letsencrypt_enabled
+    then: !Loop
+      over: !Var static_sites
+      as: hostname
+      template:
+        name: static
+        sectionName: !Format "https-{hostname}"
+    else:
+      - name: static
+        sectionName: http
+  hostnames: !Var static_sites
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: !Var garage_service_name
+          namespace: !Var garage_namespace
+          port: !Var garage_web_port
