@@ -21,6 +21,14 @@ helm template static chart -f chart/values-production.yaml
 Garage serves `foo/index.html` for `/foo/`, and redirects `/foo` to `/foo/` when there is
 no object named `foo` but `foo/index.html` exists.
 
+## Shared media of the tracontent-premium sites
+
+The sites burned from tracontent-premium link to `/media/...` files that lived in one shared
+Minio bucket. They are served from the single Garage bucket `tracontent-media`: for the sites
+listed under `sharedMedia.sites`, the HTTPRoute rewrites the Host header to that bucket name
+for `/media` requests, and Garage serves it like any other site bucket. One copy, no
+per-site duplication. `chart/migrate-media-from-minio.job.yaml` copied the files over.
+
 ## Adding a site
 
 1. Add the hostname to `sites` in `chart/values-production.yaml` and push:

@@ -6,6 +6,15 @@
 sites:
   - 2007.tracon.fi
 
+# The sites burned from tracontent-premium link to /media/... files that lived in one
+# shared Minio bucket. Instead of copying 1.3 GiB into every site bucket, requests under
+# pathPrefix on these sites get their Host header rewritten to `bucket`, so Garage serves
+# that one bucket for all of them. Create it with `bin/garage-buckets.sh <bucket>`.
+sharedMedia:
+  bucket: tracontent-media
+  pathPrefix: /media
+  sites: []
+
 garage:
   namespace: garage
   serviceName: garage

@@ -1,0 +1,53 @@
+# One-off copy of the Minio `tracontent` bucket (media shared by every tracontent-premium
+# site) into the shared media bucket, under the same /media prefix the pages link to. Reuses
+# the Secret from migrate-from-minio.job.yaml; apply by hand and delete afterwards.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: static-migrate-media-from-minio
+  namespace: static
+spec:
+  backoffLimit: 1
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: rclone
+          image: rclone/rclone:1.75.0
+          args:
+            - copy
+            - minio:tracontent
+            - garage:tracontent-media/media
+            - --fast-list
+            - --transfers=8
+            - --checkers=16
+            - --stats=1m
+            - --stats-one-line
+          env:
+            - name: RCLONE_CONFIG_MINIO_TYPE
+              value: s3
+            - name: RCLONE_CONFIG_MINIO_PROVIDER
+              value: Minio
+            - name: RCLONE_CONFIG_MINIO_ENDPOINT
+              value: http://minio.minio.svc.cluster.local:9000
+            - name: RCLONE_CONFIG_MINIO_FORCE_PATH_STYLE
+              value: "true"
+            - name: RCLONE_CONFIG_GARAGE_TYPE
+              value: s3
+            - name: RCLONE_CONFIG_GARAGE_PROVIDER
+              value: Other
+            - name: RCLONE_CONFIG_GARAGE_ENDPOINT
+              value: http://garage.garage.svc.cluster.local:3900
+            - name: RCLONE_CONFIG_GARAGE_REGION
+              value: garage
+            - name: RCLONE_CONFIG_GARAGE_FORCE_PATH_STYLE
+              value: "true"
+          envFrom:
+            - secretRef:
+                name: static-migrate-credentials
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              memory: 512Mi

@@ -45,6 +45,23 @@ spec:
   hostnames:
     - {{ . | quote }}
   rules:
+    {{- if has . $.Values.sharedMedia.sites }}
+    # Garage picks the bucket from the Host header, so rewriting it here serves the
+    # shared media bucket for this path. Rule order does not matter: Gateway API
+    # routes the more specific path match first.
+    - matches:
+        - path:
+            type: PathPrefix
+            value: {{ $.Values.sharedMedia.pathPrefix | quote }}
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            hostname: {{ $.Values.sharedMedia.bucket | quote }}
+      backendRefs:
+        - name: {{ $.Values.garage.serviceName | quote }}
+          namespace: {{ $.Values.garage.namespace | quote }}
+          port: {{ $.Values.garage.webPort }}
+    {{- end }}
     - matches:
         - path:
             type: PathPrefix
